@@ -7,8 +7,14 @@ using UnityEngine;
 public class SpectrumManager : MonoBehaviour
 {
     AudioSource _audioSource;
-    public static float[] _samples = new float[512];
-    public static float[] _freqBands = new float[8];
+    float[] _samples = new float[512];
+    float[] _freqBands = new float[8];
+    float[] _bandBuffer = new float[8];
+    float[] _bufferDecrease = new float[8];
+
+    float[] _freqBandHighest = new float[8];
+    public static float[] _audioBand = new float[8];
+    public static float[] _audioBandBuffer = new float[8];
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
@@ -19,8 +25,23 @@ public class SpectrumManager : MonoBehaviour
     {
         GetSpectrumAudioSource();
         MakeFrequencyBands();
+        BandBuffer();
+        CreateAudioBands();
     }
 
+    void CreateAudioBands()
+    {
+        for(int i = 0; i < 8; i++)
+        {
+            if(_freqBands[i] > _freqBandHighest[i])
+            {
+                _freqBandHighest[i] = _freqBands[i];
+            }
+
+            _audioBand[i] = (_freqBands[i] / _freqBandHighest[i]);
+            _audioBandBuffer[i] = (_bandBuffer[i] / _freqBandHighest[i]);
+        }
+    }
     void GetSpectrumAudioSource()
     {
         _audioSource.GetSpectrumData(_samples, 0,FFTWindow.Blackman);
@@ -63,13 +84,31 @@ public class SpectrumManager : MonoBehaviour
 
             for(int j = 0; i < sampleCount; j++)
             {
-                average = _samples[cout] * (cout + 1);
+                average += _samples[cout] * (cout + 1);
                 sampleCount++;
             }
 
             average /= cout;
 
             _freqBands[i] = average * 10;
+        }
+    }
+
+    void BandBuffer()
+    {
+        for(int g = 0; g < 8; ++g)
+        {
+            if(_freqBands[g] > _bandBuffer[g])
+            {
+                _bandBuffer[g] = _freqBands[g];
+                _bufferDecrease[g] = 0.005f;
+            }
+
+            if (_freqBands[g] < _bandBuffer[g])
+            {
+                _bandBuffer[g] -= _bufferDecrease[g];
+                _bufferDecrease[g] *= 1.2f;
+            }
         }
     }
 }

@@ -28,7 +28,7 @@ public class Instatiate512Cubes : MonoBehaviour
         {
             if(_sampleCube != null)
             {
-                _sampleCube[i].transform.localScale = new Vector3(10, (SpectrumManager._samples[i] * _maxScale) + 2, 10);
+                //_sampleCube[i].transform.localScale = new Vector3(10, (SpectrumManager._samples[i] * _maxScale) + 2, 10);
             }
         }
     }
